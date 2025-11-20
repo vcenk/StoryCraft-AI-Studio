@@ -1,0 +1,5 @@
+{
+  "name": "StoryCraft AI Studio",
+  "description": "A creative studio for building storybooks and blogs using Gemini 3 for narrative and NanoBanana (Gemini 2.5 Flash Image) for visual generation and editing.",
+  "requestFramePermissions": []
+}
