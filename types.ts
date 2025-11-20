@@ -1,3 +1,4 @@
+
 export enum AppView {
   DASHBOARD = 'DASHBOARD',
   STORY_EDITOR = 'STORY_EDITOR',
@@ -5,7 +6,13 @@ export enum AppView {
   BLOG_CREATOR = 'BLOG_CREATOR'
 }
 
-export type NodeType = 'chapter' | 'story' | 'image' | 'audit' | 'export' | 'cover';
+export type NodeType = 'chapter' | 'story' | 'image' | 'audit' | 'export' | 'cover' | 'note';
+
+export interface NodeConnection {
+  id: string;
+  source: string;
+  target: string;
+}
 
 export interface AuditResult {
   score: number;
@@ -27,6 +34,25 @@ export interface CoverData {
   backCoverImageBase64?: string;
 }
 
+export interface OutlineScene {
+  label: string;
+  prompt: string;
+}
+
+export interface OutlineChapter {
+  title: string;
+  scenes: OutlineScene[];
+}
+
+export interface BookLayout {
+  presetId: string;
+  label: string;
+  description: string;
+  width: number; // inches
+  height: number; // inches
+  pageType: 'kids_picture_book' | 'novel' | 'guide';
+}
+
 export interface NodeData {
   label?: string;
   prompt?: string;
@@ -37,7 +63,14 @@ export interface NodeData {
   status?: 'idle' | 'loading' | 'success' | 'error';
   chapterId?: string;
   targetAge?: string;
-  tone?: string;
+  tone?: string; // Specific for Story Node context
+  chapterTone?: 'Adventurous' | 'Funny' | 'Scary' | 'Educational' | 'Whimsical'; // Specific for Chapter Node
+  imageStyle?: 'Digital Art' | 'Watercolor' | 'Cartoon' | 'Sketch';
+  aspectRatio?: '1:1' | '16:9' | '9:16' | '4:3';
+  exportFormat?: 'html' | 'pdf' | 'epub';
+  // bookDimensions is now deprecated in favor of global project layout, 
+  // but kept optional for backward compatibility or node-specific overrides if needed
+  bookDimensions?: string; 
 }
 
 export interface StoryNode {

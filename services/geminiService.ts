@@ -1,5 +1,6 @@
+
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
-import { AuditResult, CoverData } from "../types";
+import { AuditResult, CoverData, OutlineChapter, BookLayout } from "../types";
 
 // Constants for Model Names based on requirements
 const MODEL_TEXT = 'gemini-2.5-flash';
@@ -121,6 +122,57 @@ export const generateCoverIdeas = async (storyContext: string, metadata: { genre
     return JSON.parse(text) as CoverData;
   } catch (error) {
     console.error("Error generating cover ideas:", error);
+    throw error;
+  }
+};
+
+/**
+ * Generates a structured book outline respecting the layout
+ */
+export const generateBookOutline = async (topic: string, audience: string, layout?: BookLayout): Promise<OutlineChapter[]> => {
+  const ai = getAIClient();
+  
+  let layoutInstruction = "";
+  if (layout) {
+      if (layout.pageType === 'kids_picture_book') {
+          layoutInstruction = `Format for a Children's Picture Book (${layout.width}" x ${layout.height}"). Create shorter scenes suitable for full-page illustrations.`;
+      } else if (layout.pageType === 'novel') {
+          layoutInstruction = `Format for a Novel (${layout.width}" x ${layout.height}"). Create rich, text-heavy chapters.`;
+      }
+  }
+
+  const prompt = `
+    Create a structured outline for a book about "${topic}" for an audience of "${audience}".
+    ${layoutInstruction}
+    
+    Return a valid JSON object (NO MARKDOWN FORMATTING) that is an ARRAY of chapters.
+    Structure:
+    [
+      {
+        "title": "Chapter 1: Title",
+        "scenes": [
+          { "label": "Scene 1", "prompt": "Detailed writing prompt for this scene" },
+          { "label": "Scene 2", "prompt": "Detailed writing prompt for this scene" }
+        ]
+      },
+      ...
+    ]
+    Limit to 3 chapters for this demo.
+  `;
+
+  try {
+    const response: GenerateContentResponse = await ai.models.generateContent({
+      model: MODEL_TEXT,
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json"
+      }
+    });
+
+    const text = response.text || "[]";
+    return JSON.parse(text) as OutlineChapter[];
+  } catch (error) {
+    console.error("Error generating outline:", error);
     throw error;
   }
 };
